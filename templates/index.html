@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PhishGuard – Phishing Website Detector</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500&family=Sora:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<header class="nav">
+  <a class="brand" href="#scan"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/></svg>PhishGuard</a>
+  <button class="burger" id="burger" aria-label="Toggle menu">☰</button>
+  <nav id="menu">
+    <a href="#scan" data-view="scan">Scan</a>
+    <a href="#history" data-view="history">History</a>
+    <a href="#learn" data-view="learn">Learn</a>
+  </nav>
+</header>
+
+<main>
+<section id="view-scan" class="view">
+  <div class="hero">
+    <h1>Phishing Website Detector</h1>
+    <p class="lead">Phishing is when attackers copy a trusted website to steal your passwords, card numbers or personal details. Paste a link below and PhishGuard checks its structure with a machine learning model before you click.</p>
+    <div class="scanbox">
+      <input id="url" type="text" placeholder="https://example.com/login" autocomplete="off" spellcheck="false" aria-label="URL to scan">
+      <button id="scanBtn" class="primary">Scan Website</button>
+    </div>
+    <div class="samples">Try a sample: <button class="link" data-sample="https://www.github.com/features">safe example</button> <button class="link" data-sample="http://paypal.com.secure-login-78213.xyz:8080/verify/account@update">suspicious example</button></div>
+    <p id="error" class="error" role="alert" hidden></p>
+  </div>
+
+  <div id="result" class="result" hidden>
+    <div class="verdict">
+      <div><span class="small">Result for</span><div id="rUrl" class="url"></div></div>
+      <div id="rBadge" class="badge"></div>
+    </div>
+    <div class="meters">
+      <div><span class="small">Risk level</span><strong id="rRisk"></strong></div>
+      <div><span class="small">Model confidence</span><strong id="rConf"></strong><div class="bar"><i id="rBar"></i></div></div>
+    </div>
+    <p id="rExplain"></p>
+    <h3>Features that contributed</h3>
+    <ul id="rFeatures" class="flags"></ul>
+    <p class="disclaimer">PhishGuard is an educational detection tool. It looks only at the URL text and cannot guarantee that a website is safe or unsafe.</p>
+  </div>
+
+  <div class="stats">
+    <div><strong id="sTotal">0</strong><span>Total scans</span></div>
+    <div class="safe"><strong id="sSafe">0</strong><span>Safe websites</span></div>
+    <div class="bad"><strong id="sBad">0</strong><span>Suspicious websites</span></div>
+    <div class="chartbox"><canvas id="chart" height="120" aria-label="Scan results chart"></canvas></div>
+  </div>
+
+  <div class="how">
+    <h2>How the detector works</h2>
+    <ol>
+      <li><b>You enter a URL.</b> It is never opened or visited — only the text is analysed.</li>
+      <li><b>12 features are extracted</b>, such as length, dots, hyphens, IP addresses, HTTPS, subdomains and risky words.</li>
+      <li><b>A Random Forest model votes.</b> 200 decision trees each judge the features; the share voting "phishing" becomes the confidence score.</li>
+      <li><b>You see the verdict</b> with a risk level and the features that raised the warning.</li>
+    </ol>
+  </div>
+</section>
+
+<section id="view-history" class="view" hidden>
+  <div class="row"><h2>Scan history</h2><button id="clearBtn" class="danger">Clear history</button></div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>URL</th><th>Date and time</th><th>Result</th><th>Risk</th></tr></thead>
+    <tbody id="histBody"></tbody>
+  </table></div>
+  <p id="histEmpty" class="empty" hidden>No scans yet. Scan a website and it will appear here.</p>
+</section>
+
+<section id="view-learn" class="view" hidden>
+  <h2>Learn about phishing</h2>
+  <div class="cards">
+    <article><h3>What is phishing?</h3><p>Phishing is a scam where someone pretends to be a trusted company or person to trick you into sharing passwords, bank details or other private information.</p></article>
+    <article><h3>How phishing websites work</h3><p>The attacker builds a fake page that looks like a real login or payment page, then sends the link by email, SMS or social media. Anything you type goes straight to the attacker.</p></article>
+    <article><h3>Common signs</h3><ul><li>A web address that is odd, long or uses an IP number</li><li>Brand names inside a different domain (paypal.com.example.xyz)</li><li>Urgent messages such as "verify now or lose access"</li><li>Missing HTTPS or an @ symbol in the link</li><li>Shortened links that hide the destination</li></ul></article>
+    <article><h3>How machine learning helps</h3><p>A model learns from thousands of labelled links which URL patterns are usually phishing. It can then score new links instantly, including ones no human has reported yet. It can still be wrong, so it is a helper, not a guarantee.</p></article>
+    <article><h3>How to protect yourself</h3><ul><li>Type important addresses yourself or use bookmarks</li><li>Never click links in unexpected messages</li><li>Use a password manager — it will not fill in fake sites</li><li>Turn on two-factor authentication</li><li>Keep your browser and devices updated</li></ul></article>
+  </div>
+</section>
+</main>
+<footer>Educational project · Trained on a demonstration dataset, so results do not reflect real-world accuracy.</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
